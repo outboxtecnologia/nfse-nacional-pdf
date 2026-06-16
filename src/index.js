@@ -69,10 +69,6 @@ fastify.post('/api/pdf', async (request, reply) => {
 
     generator.parseXml(xmlContent);
     generator.setLogoSvg(svgLogo);
-    generator.setHeaderInfo({
-      municipalityLine: 'Prefeitura Municipal',
-      secretariatLine: 'Secretaria de Finanças',
-    });
 
     const doc = await generator.generate();
 

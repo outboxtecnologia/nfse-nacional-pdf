@@ -378,10 +378,10 @@ export class NfsePdfGenerator {
     }
 
     const textX = rightX + logoWidth + gap;
-    const municipalityLine = this.headerInfo.municipalityLine || (`Prefeitura Municipal de ${this.data.localEmissao}`);
-    const secretariatLine = this.headerInfo.secretariatLine || 'Secretaria Municipal da Fazenda';
-    const phoneLine = this.headerInfo.phoneLine || '(48)3431-0074';
-    const emailLine = this.headerInfo.emailLine || 'tributos@criciuma.sc.gov.br';
+    const municipalityLine = this.headerInfo.municipalityLine || `Prefeitura Municipal de ${this.data.localEmissao}`;
+    const secretariatLine = this.headerInfo.secretariatLine || 'Secretaria Municipal de Finanças';
+    const phoneLine = this.headerInfo.phoneLine || this.data.emitente.fone || '-';
+    const emailLine = this.headerInfo.emailLine || this.data.emitente.email || '-';
 
     this.cell(municipalityLine, textX, startY, textBlockWidth, 3, 'left', true, 8);
     this.cell(secretariatLine, textX, startY + mm(3), textBlockWidth, 2.5, 'left', false, 6);
