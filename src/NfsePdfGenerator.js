@@ -22,6 +22,7 @@ export class NfsePdfGenerator {
         left: mm(5),
         right: mm(5)
       },
+      autoPageBreak: false, // Prevent PDFKit from auto-creating page 2 and mixing coordinates
       bufferPages: true
     });
     this.margin = mm(5);
@@ -255,7 +256,7 @@ export class NfsePdfGenerator {
     return value;
   }
 
-  truncateTextToLines(text, width, maxLines, lineHeight = 4, suffix = '...') {
+  truncateTextToLines(text, width, maxLines, lineHeight = mm(4), suffix = '...') {
     const maxHeight = maxLines * lineHeight;
     if (this.getStringHeight(text, width) <= maxHeight) {
       return text;
@@ -299,12 +300,11 @@ export class NfsePdfGenerator {
         .stroke();
         
     if (addLineHeight) {
-      this.doc.y = y + 2;
+      this.doc.y = y + mm(2);
     }
   }
 
   async generate() {
-    // Pre-generate QR code buffer asynchronously
     const qrUrl = `https://www.nfse.gov.br/ConsultaPublica?tpc=1&chave=${this.data.chaveAcesso}`;
     try {
       this.qrBuffer = await QRCode.toBuffer(qrUrl, {
@@ -348,7 +348,7 @@ export class NfsePdfGenerator {
 
     const centerX = mm(62);
     this.cell('DANFSe v1.0', centerX, startY, mm(50), 4, 'center', true, 9);
-    this.cell('Documento Auxiliar da NFS-e', centerX, startY + 4, mm(50), 4, 'center', true, 9);
+    this.cell('Documento Auxiliar da NFS-e', centerX, startY + mm(4), mm(50), 4, 'center', true, 9);
 
     const rightX = mm(137);
     const blockWidth = mm(55);
@@ -371,11 +371,11 @@ export class NfsePdfGenerator {
     const emailLine = this.headerInfo.emailLine || 'tributos@criciuma.sc.gov.br';
 
     this.cell(municipalityLine, textX, startY, textBlockWidth, 3, 'left', true, 8);
-    this.cell(secretariatLine, textX, startY + 3, textBlockWidth, 2.5, 'left', false, 6);
-    this.cell(phoneLine, textX, startY + 5.5, textBlockWidth, 2.5, 'left', false, 6);
-    this.cell(emailLine, textX, startY + 8, textBlockWidth, 2.5, 'left', false, 6);
+    this.cell(secretariatLine, textX, startY + mm(3), textBlockWidth, 2.5, 'left', false, 6);
+    this.cell(phoneLine, textX, startY + mm(5.5), textBlockWidth, 2.5, 'left', false, 6);
+    this.cell(emailLine, textX, startY + mm(8), textBlockWidth, 2.5, 'left', false, 6);
 
-    this.setY(startY + 12 + 1);
+    this.setY(startY + mm(12) + mm(1));
   }
 
   addDadosNfse() {
@@ -392,9 +392,9 @@ export class NfsePdfGenerator {
 
     const fullWidth = col1W + col2W + col3W + col4W;
     this.cell('Chave de Acesso da NFS-e', col1X, startY, fullWidth, 4, 'left', true, 7);
-    this.cell(this.data.chaveAcesso, col1X, startY + 4, fullWidth, 4, 'left', false, 8);
+    this.cell(this.data.chaveAcesso, col1X, startY + mm(4), fullWidth, 4, 'left', false, 8);
 
-    const row1Y = startY + 9;
+    const row1Y = startY + mm(9);
 
     const qrSize = mm(18);
     const qrX = col4X + (col4W - qrSize) / 1.5;
@@ -408,26 +408,26 @@ export class NfsePdfGenerator {
     this.cell('Competência da NFS-e', col2X, row1Y, col2W, 4, 'left', true, 7);
     this.cell('Data e Hora da emissão da NFS-e', col3X, row1Y, col3W, 4, 'left', true, 7);
 
-    const row2Y = row1Y + 4;
+    const row2Y = row1Y + mm(4);
     this.cell(this.data.numeroNfse, col1X, row2Y, col1W, 4, 'left', false, 8);
     this.cell(this.data.dps.competencia, col2X, row2Y, col2W, 4, 'left', false, 8);
     this.cell(this.data.dataProcessamento, col3X, row2Y, col3W, 4, 'left', false, 8);
 
-    const row3Y = row2Y + 5;
+    const row3Y = row2Y + mm(5);
     this.cell('Número da DPS', col1X, row3Y, col1W, 4, 'left', true, 7);
     this.cell('Série da DPS', col2X, row3Y, col2W, 4, 'left', true, 7);
     this.cell('Data e Hora da emissão da DPS', col3X, row3Y, col3W, 4, 'left', true, 7);
 
-    const row4Y = row3Y + 4;
+    const row4Y = row3Y + mm(4);
     this.cell(this.data.dps.numero, col1X, row4Y, col1W, 4, 'left', false, 8);
     this.cell(this.data.dps.serie, col2X, row4Y, col2W, 4, 'left', false, 8);
     this.cell(this.data.dps.dataEmissao, col3X, row4Y, col3W, 4, 'left', false, 8);
 
     const message = 'A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela consulta da chave de acesso no portal nacional da NFS-e';
-    this.multiCell(message, col4X, row4Y, col4W - 1, 1, 'left', false, 5);
+    this.multiCell(message, col4X, row4Y, col4W - mm(1), 1, 'left', false, 5);
     
     const messageEndY = this.getY();
-    this.setY(Math.max(row1Y + qrSize, messageEndY) + 2);
+    this.setY(Math.max(row1Y + qrSize, messageEndY) + mm(2));
   }
 
   addEmitente() {
@@ -448,27 +448,27 @@ export class NfsePdfGenerator {
     this.cell('Inscrição Municipal', col3X, startY, col3W, 4, 'left', true, 7);
     this.cell('Telefone', col4X, startY, col4W, 4, 'left', true, 7);
 
-    this.cell('Prestador do Serviço', col1X, startY + 4, col1W, 4, 'left', false, 8);
-    this.cell(emit.cnpj, col2X, startY + 4, col2W, 4, 'left', false, 8);
-    this.cell(emit.IM, col3X, startY + 4, col3W, 4, 'left', false, 8);
-    this.cell(emit.fone, col4X, startY + 4, col4W, 4, 'left', false, 8);
+    this.cell('Prestador do Serviço', col1X, startY + mm(4), col1W, 4, 'left', false, 8);
+    this.cell(emit.cnpj, col2X, startY + mm(4), col2W, 4, 'left', false, 8);
+    this.cell(emit.IM, col3X, startY + mm(4), col3W, 4, 'left', false, 8);
+    this.cell(emit.fone, col4X, startY + mm(4), col4W, 4, 'left', false, 8);
 
-    const row2Y = startY + 9;
+    const row2Y = startY + mm(9);
     this.cell('Nome / Nome Empresarial', col1X, row2Y, col1W, 4, 'left', true, 7);
     this.cell('E-mail', col3X, row2Y, col3W, 4, 'left', true, 7);
 
-    this.cell(emit.nome, col1X, row2Y + 4, col1W + col2W, 4, 'left', false, 8);
-    this.cell(emit.email, col3X, row2Y + 4, col3W, 4, 'left', false, 8);
+    this.cell(emit.nome, col1X, row2Y + mm(4), col1W + col2W, 4, 'left', false, 8);
+    this.cell(emit.email, col3X, row2Y + mm(4), col3W, 4, 'left', false, 8);
 
-    const row3Y = row2Y + 9;
+    const row3Y = row2Y + mm(9);
     this.cell('Endereço', col1X, row3Y, col1W, 4, 'left', true, 7);
     this.cell('Município', col3X, row3Y, col3W, 4, 'left', true, 7);
     this.cell('CEP', col4X, row3Y, col4W, 4, 'left', true, 7);
 
     const endereco = `${emit.logradouro}, ${emit.numero}, ${emit.bairro}`;
-    this.cell(endereco, col1X, row3Y + 4, col1W + col2W, 4, 'left', false, 8);
-    this.cell(`${this.data.localEmissao} - ${emit.uf}`, col3X, row3Y + 4, col3W, 4, 'left', false, 8);
-    this.cell(emit.cep, col4X, row3Y + 4, col4W, 4, 'left', false, 8);
+    this.cell(endereco, col1X, row3Y + mm(4), col1W + col2W, 4, 'left', false, 8);
+    this.cell(`${this.data.localEmissao} - ${emit.uf}`, col3X, row3Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell(emit.cep, col4X, row3Y + mm(4), col4W, 4, 'left', false, 8);
 
     const opSimpNacMap = {
       '1': 'Não Optante',
@@ -486,15 +486,15 @@ export class NfsePdfGenerator {
     const descSimples = opSimpNacMap[opSimpNac] || opSimpNacMap['1'];
     const descReg = regApTribSNMap[regApTribSN] || '-';
 
-    const row4Y = row3Y + 9;
+    const row4Y = row3Y + mm(9);
     this.cell('Simples Nacional na Data de Competência', col1X, row4Y, col1W, 4, 'left', true, 7);
     this.cell('Regime de Apuração Tributária pelo SN', col3X, row4Y, col3W + col4W, 4, 'left', true, 7);
 
-    this.cell(descSimples, col1X, row4Y + 4, col1W + col2W, 4, 'left', false, 8);
-    this.multiCell(descReg, col3X, row4Y + 4, col3W + col4W, 4, 'left', false, 8);
+    this.cell(descSimples, col1X, row4Y + mm(4), col1W + col2W, 4, 'left', false, 8);
+    this.multiCell(descReg, col3X, row4Y + mm(4), col3W + col4W, 4, 'left', false, 8);
 
     const descRegEndY = this.getY();
-    this.setY(Math.max(descRegEndY, row4Y + 8) + 1);
+    this.setY(Math.max(descRegEndY, row4Y + mm(8)) + mm(1));
   }
 
   addTomador() {
@@ -515,19 +515,19 @@ export class NfsePdfGenerator {
     this.cell('Inscrição Municipal', col3X, startY, col3W, 4, 'left', true, 7);
     this.cell('Telefone', col4X, startY, col4W, 4, 'left', true, 7);
 
-    this.cell('', col1X, startY + 4, col1W, 4, 'left', false, 8);
-    this.cell(toma.cnpj, col2X, startY + 4, col2W, 4, 'left', false, 8);
-    this.cell(toma.IM, col3X, startY + 4, col3W, 4, 'left', false, 8);
-    this.cell(toma.fone, col4X, startY + 4, col4W, 4, 'left', false, 8);
+    this.cell('', col1X, startY + mm(4), col1W, 4, 'left', false, 8);
+    this.cell(toma.cnpj, col2X, startY + mm(4), col2W, 4, 'left', false, 8);
+    this.cell(toma.IM, col3X, startY + mm(4), col3W, 4, 'left', false, 8);
+    this.cell(toma.fone, col4X, startY + mm(4), col4W, 4, 'left', false, 8);
 
-    const row2Y = startY + 9;
+    const row2Y = startY + mm(9);
     this.cell('Nome / Nome Empresarial', col1X, row2Y, col1W, 4, 'left', true, 7);
     this.cell('E-mail', col3X, row2Y, col3W, 4, 'left', true, 7);
 
-    this.cell(toma.nome, col1X, row2Y + 4, col1W + col2W, 4, 'left', false, 8);
-    this.cell(toma.email, col3X, row2Y + 4, col3W, 4, 'left', false, 8);
+    this.cell(toma.nome, col1X, row2Y + mm(4), col1W + col2W, 4, 'left', false, 8);
+    this.cell(toma.email, col3X, row2Y + mm(4), col3W, 4, 'left', false, 8);
 
-    const row3Y = row2Y + 9;
+    const row3Y = row2Y + mm(9);
     this.cell('Endereço', col1X, row3Y, col1W, 4, 'left', true, 7);
     this.cell('Município', col3X, row3Y, col3W, 4, 'left', true, 7);
     this.cell('CEP', col4X, row3Y, col4W, 4, 'left', true, 7);
@@ -543,14 +543,14 @@ export class NfsePdfGenerator {
       municipioTomador += ` - ${toma.uf}`;
     }
 
-    this.cell(endereco, col1X, row3Y + 4, col1W + col2W, 4, 'left', false, 8);
-    this.cell(municipioTomador, col3X, row3Y + 4, col3W, 4, 'left', false, 8);
-    this.cell(toma.cep, col4X, row3Y + 4, col4W, 4, 'left', false, 8);
+    this.cell(endereco, col1X, row3Y + mm(4), col1W + col2W, 4, 'left', false, 8);
+    this.cell(municipioTomador, col3X, row3Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell(toma.cep, col4X, row3Y + mm(4), col4W, 4, 'left', false, 8);
 
-    this.setY(row3Y + 9);
+    this.setY(row3Y + mm(9));
     this.addHorizontalLine(false);
     this.cell('INTERMEDIÁRIO DO SERVIÇO NÃO IDENTIFICADO NA NFS-e', this.margin, this.getY(), mm(200), 4, 'center', false, 7);
-    this.setY(this.getY() + 4);
+    this.setY(this.getY() + mm(4));
   }
 
   addServico() {
@@ -568,13 +568,13 @@ export class NfsePdfGenerator {
 
     this.cell('SERVIÇO PRESTADO', col1X, startY, mm(200), 4, 'left', true, 7);
 
-    const headersY = startY + 4;
+    const headersY = startY + mm(4);
     this.cell('Código de Tributação Nacional', col1X, headersY, col1W, 4, 'left', true, 7);
     this.cell('Código de Tributação Municipal', col2X, headersY, col2W, 4, 'left', true, 7);
     this.cell('Local da Prestação', col3X, headersY, col3W, 4, 'left', true, 7);
     this.cell('País da Prestação', col4X, headersY, col4W, 4, 'left', true, 7);
 
-    const dataY = headersY + 4;
+    const dataY = headersY + mm(4);
     const codTribFormatted = this.formatCodTribNac(serv.codTribNac);
     const codTrib = this.truncateTextToLines(`${codTribFormatted} - ${this.data.tribNac}`, col1W, 3);
 
@@ -597,7 +597,7 @@ export class NfsePdfGenerator {
     this.multiCell(descCleaned, col2X, descY, col2W + col3W + col4W, 4, 'left', false, 8);
 
     const descEndY = this.getY();
-    this.setY(Math.max(descEndY, descY + 4) + 2);
+    this.setY(Math.max(descEndY, descY + mm(4)) + mm(2));
   }
 
   addTributacao() {
@@ -613,7 +613,7 @@ export class NfsePdfGenerator {
     const startY = this.getY();
     this.cell('TRIBUTAÇÃO MUNICIPAL', col1X, startY, mm(200), 4, 'left', true, 7);
 
-    const row1Y = startY + 4;
+    const row1Y = startY + mm(4);
     this.cell('Tributação do ISSQN', col1X, row1Y, col1W, 4, 'left', true, 7);
     this.cell('País Resultado da Prestação do Serviço', col2X, row1Y, col2W, 4, 'left', true, 7);
     this.cell('Município de Incidência do ISSQN', col3X, row1Y, col3W, 4, 'left', true, 7);
@@ -624,34 +624,34 @@ export class NfsePdfGenerator {
       localIncidencia += ` - ${this.data.emitente.uf}`;
     }
 
-    this.cell('Operação Tributável', col1X, row1Y + 4, col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row1Y + 4, col2W, 4, 'left', false, 8);
-    this.cell(localIncidencia, col3X, row1Y + 4, col3W, 4, 'left', false, 8);
-    this.cell('Nenhum', col4X, row1Y + 4, col4W, 4, 'left', false, 8);
+    this.cell('Operação Tributável', col1X, row1Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell('-', col2X, row1Y + mm(4), col2W, 4, 'left', false, 8);
+    this.cell(localIncidencia, col3X, row1Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell('Nenhum', col4X, row1Y + mm(4), col4W, 4, 'left', false, 8);
 
-    const row2Y = row1Y + 9;
+    const row2Y = row1Y + mm(9);
     this.cell('Tipo de Imunidade', col1X, row2Y, col1W, 4, 'left', true, 7);
     this.cell('Suspensão da Exigibilidade do ISSQN', col2X, row2Y, col2W, 4, 'left', true, 7);
     this.cell('Número Processo Suspensão', col3X, row2Y, col3W, 4, 'left', true, 7);
     this.cell('Benefício Municipal', col4X, row2Y, col4W, 4, 'left', true, 7);
 
-    this.cell('-', col1X, row2Y + 4, col1W, 4, 'left', false, 8);
-    this.cell('Não', col2X, row2Y + 4, col2W, 4, 'left', false, 8);
-    this.cell('-', col3X, row2Y + 4, col3W, 4, 'left', false, 8);
-    this.cell('-', col4X, row2Y + 4, col4W, 4, 'left', false, 8);
+    this.cell('-', col1X, row2Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell('Não', col2X, row2Y + mm(4), col2W, 4, 'left', false, 8);
+    this.cell('-', col3X, row2Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell('-', col4X, row2Y + mm(4), col4W, 4, 'left', false, 8);
 
-    const row3Y = row2Y + 9;
+    const row3Y = row2Y + mm(9);
     this.cell('Valor do Serviço', col1X, row3Y, col1W, 4, 'left', true, 7);
     this.cell('Desconto Incondicionado', col2X, row3Y, col2W, 4, 'left', true, 7);
     this.cell('Total Deduções/Reduções', col3X, row3Y, col3W, 4, 'left', true, 7);
     this.cell('Cálculo do BM', col4X, row3Y, col4W, 4, 'left', true, 7);
 
-    this.cell(`R$ ${this.formatMoney(this.data.valores.valorServico)}`, col1X, row3Y + 4, col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row3Y + 4, col2W, 4, 'left', false, 8);
-    this.cell('-', col3X, row3Y + 4, col3W, 4, 'left', false, 8);
-    this.cell('-', col4X, row3Y + 4, col4W, 4, 'left', false, 8);
+    this.cell(`R$ ${this.formatMoney(this.data.valores.valorServico)}`, col1X, row3Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell('-', col2X, row3Y + mm(4), col2W, 4, 'left', false, 8);
+    this.cell('-', col3X, row3Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell('-', col4X, row3Y + mm(4), col4W, 4, 'left', false, 8);
 
-    const row4Y = row3Y + 9;
+    const row4Y = row3Y + mm(9);
     this.cell('BC ISSQN', col1X, row4Y, col1W, 4, 'left', true, 7);
     this.cell('Alíquota Aplicada', col2X, row4Y, col2W, 4, 'left', true, 7);
     this.cell('Retenção do ISSQN', col3X, row4Y, col3W, 4, 'left', true, 7);
@@ -664,38 +664,38 @@ export class NfsePdfGenerator {
     };
     const retencaoIssqn = tpRetISSQNMap[this.data.tributacao.tpRetISSQN] || '-';
 
-    this.cell(this.data.valores.bcIssqn > 0 ? `R$ ${this.formatMoney(this.data.valores.bcIssqn)}` : '-', col1X, row4Y + 4, col1W, 4, 'left', false, 8);
-    this.cell(this.data.valores.aliqAplicada > 0 ? `${this.formatMoney(this.data.valores.aliqAplicada)}%` : '-', col2X, row4Y + 4, col2W, 4, 'left', false, 8);
-    this.cell(retencaoIssqn, col3X, row4Y + 4, col3W, 4, 'left', false, 8);
-    this.cell(this.data.valores.issqnApurado > 0 ? `R$ ${this.formatMoney(this.data.valores.issqnApurado)}` : '-', col4X, row4Y + 4, col4W, 4, 'left', false, 8);
+    this.cell(this.data.valores.bcIssqn > 0 ? `R$ ${this.formatMoney(this.data.valores.bcIssqn)}` : '-', col1X, row4Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell(this.data.valores.aliqAplicada > 0 ? `${this.formatMoney(this.data.valores.aliqAplicada)}%` : '-', col2X, row4Y + mm(4), col2W, 4, 'left', false, 8);
+    this.cell(retencaoIssqn, col3X, row4Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell(this.data.valores.issqnApurado > 0 ? `R$ ${this.formatMoney(this.data.valores.issqnApurado)}` : '-', col4X, row4Y + mm(4), col4W, 4, 'left', false, 8);
 
-    this.setY(row4Y + 9);
+    this.setY(row4Y + mm(9));
     this.addHorizontalLine();
     
     const row5Y = this.getY();
     this.cell('TRIBUTAÇÃO FEDERAL', col1X, row5Y, mm(200), 4, 'left', true, 7);
 
-    const row5HeadersY = row5Y + 4;
+    const row5HeadersY = row5Y + mm(4);
     this.cell('IRRF', col1X, row5HeadersY, col1W, 4, 'left', true, 7);
     this.cell('Contribuição Previdenciária - Retida', col2X, row5HeadersY, col2W, 4, 'left', true, 7);
     this.cell('Contribuições Sociais - Retidas', col3X, row5HeadersY, col3W, 4, 'left', true, 7);
     this.cell('Descrição Contrib. Sociais - Retidas', col4X, row5HeadersY, col4W, 4, 'left', true, 7);
 
-    const row5DataY = row5HeadersY + 4;
+    const row5DataY = row5HeadersY + mm(4);
     this.cell('-', col1X, row5DataY, col1W, 4, 'left', false, 8);
     this.cell('-', col2X, row5DataY, col2W, 4, 'left', false, 8);
     this.cell('-', col3X, row5DataY, col3W, 4, 'left', false, 8);
     this.cell('-', col4X, row5DataY, col4W, 4, 'left', false, 8);
 
-    const row6HeadersY = row5DataY + 5;
+    const row6HeadersY = row5DataY + mm(5);
     this.cell('PIS - Débito Apuração Própria', col1X, row6HeadersY, col1W, 4, 'left', true, 7);
     this.cell('COFINS - Débito Apuração Própria', col2X, row6HeadersY, col2W, 4, 'left', true, 7);
 
-    const row6DataY = row6HeadersY + 4;
+    const row6DataY = row6HeadersY + mm(4);
     this.cell('-', col1X, row6DataY, col1W, 4, 'left', false, 8);
     this.cell('-', col2X, row6DataY, col2W, 4, 'left', false, 8);
 
-    this.setY(row6DataY + 5);
+    this.setY(row6DataY + mm(5));
   }
 
   addValores() {
@@ -711,7 +711,7 @@ export class NfsePdfGenerator {
     const startY = this.getY();
     this.cell('VALOR TOTAL DA NFS-E', col1X, startY, mm(200), 4, 'left', true, 7);
 
-    const row1Y = startY + 4;
+    const row1Y = startY + mm(4);
     this.cell('Valor do Serviço', col1X, row1Y, col1W, 4, 'left', true, 7);
     this.cell('Desconto Condicionado', col2X, row1Y, col2W, 4, 'left', true, 7);
     this.cell('Desconto Incondicionado', col3X, row1Y, col3W, 4, 'left', true, 7);
@@ -722,21 +722,21 @@ export class NfsePdfGenerator {
         ? `R$ ${this.formatMoney(this.data.valores.issqnApurado)}`
         : '-';
 
-    this.cell(`R$ ${this.formatMoney(this.data.valores.valorServico)}`, col1X, row1Y + 4, col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row1Y + 4, col2W, 4, 'left', false, 8);
-    this.cell('-', col3X, row1Y + 4, col3W, 4, 'left', false, 8);
-    this.cell(issqnRetido, col4X, row1Y + 4, col4W, 4, 'left', false, 8);
+    this.cell(`R$ ${this.formatMoney(this.data.valores.valorServico)}`, col1X, row1Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell('-', col2X, row1Y + mm(4), col2W, 4, 'left', false, 8);
+    this.cell('-', col3X, row1Y + mm(4), col3W, 4, 'left', false, 8);
+    this.cell(issqnRetido, col4X, row1Y + mm(4), col4W, 4, 'left', false, 8);
 
-    const row2Y = row1Y + 9;
+    const row2Y = row1Y + mm(9);
     this.cell('Total das Retenções Federais', col1X, row2Y, col1W, 4, 'left', true, 7);
     this.cell('PIS/COFINS - Débito Apur. Própria', col2X, row2Y, col2W, 4, 'left', true, 7);
     this.cell('Valor Líquido da NFS-e', col4X, row2Y, col4W, 4, 'left', true, 7);
 
-    this.cell('-', col1X, row2Y + 4, col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row2Y + 4, col2W, 4, 'left', false, 8);
-    this.cell(`R$ ${this.formatMoney(this.data.valores.valorLiquido)}`, col4X, row2Y + 4, col4W, 4, 'left', true, 8);
+    this.cell('-', col1X, row2Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell('-', col2X, row2Y + mm(4), col2W, 4, 'left', false, 8);
+    this.cell(`R$ ${this.formatMoney(this.data.valores.valorLiquido)}`, col4X, row2Y + mm(4), col4W, 4, 'left', true, 8);
 
-    this.setY(row2Y + 9);
+    this.setY(row2Y + mm(9));
   }
 
   addTotaisTributos() {
@@ -750,17 +750,17 @@ export class NfsePdfGenerator {
     const startY = this.getY();
     this.cell('TOTAIS APROXIMADOS DOS TRIBUTOS', col1X, startY, mm(200), 4, 'left', true, 7);
 
-    const headersY = startY + 4;
+    const headersY = startY + mm(4);
     this.cell('Federais', col1X, headersY, col1W, 4, 'left', true, 7);
     this.cell('Estaduais', col2X, headersY, col2W, 4, 'left', true, 7);
     this.cell('Municípios', col3X, headersY, col3W, 4, 'left', true, 7);
 
-    const dataY = headersY + 4;
+    const dataY = headersY + mm(4);
     this.cell(`${this.formatMoney(this.data.tributacao.totTribFed)} %`, col1X, dataY, col1W, 4, 'left', false, 8);
     this.cell(`${this.formatMoney(this.data.tributacao.totTribEst)} %`, col2X, dataY, col2W, 4, 'left', false, 8);
     this.cell(`${this.formatMoney(this.data.tributacao.totTribMun)} %`, col3X, dataY, col3W, 4, 'left', false, 8);
 
-    this.setY(dataY + 8);
+    this.setY(dataY + mm(8));
     this.cell('INFORMAÇÕES COMPLEMENTARES', this.margin, this.getY(), mm(200), 4, 'left', true, 7);
   }
 
