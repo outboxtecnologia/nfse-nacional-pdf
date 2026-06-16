@@ -88,7 +88,7 @@ fastify.post('/api/pdf', async (request, reply) => {
     reply.header('Content-Type', 'application/pdf');
     reply.header('Content-Disposition', 'inline; filename="nfse.pdf"');
     reply.header('Cache-Control', 'private, max-age=0, must-revalidate');
-    reply.header('Pragma: public');
+    reply.header('Pragma', 'public');
     
     return pdfBuffer;
   } catch (err) {
