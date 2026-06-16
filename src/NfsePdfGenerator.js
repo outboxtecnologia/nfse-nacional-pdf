@@ -117,11 +117,19 @@ export class NfsePdfGenerator {
       throw new Error("Invalid NFS-e XML structure: infDPS/DPS element not found");
     }
 
-    const id = infNFSe.Id || "";
+    const extractText = (val) => {
+      if (val == null) return '';
+      if (typeof val === 'object') {
+        return val['#text'] !== undefined ? String(val['#text']) : '';
+      }
+      return String(val);
+    };
+
+    const id = extractText(infNFSe.Id || '');
     const chaveAcesso = id.replace(/^NFS/, '');
 
-    const opSimpNac = dps.prest?.regTrib?.opSimpNac || '';
-    const regApTribSN = dps.prest?.regTrib?.regApTribSN || '';
+    const opSimpNac = extractText(dps.prest?.regTrib?.opSimpNac);
+    const regApTribSN = extractText(dps.prest?.regTrib?.regApTribSN);
 
     const emit = infNFSe.emit || {};
     const enderEmit = emit.enderNac || {};
@@ -138,66 +146,71 @@ export class NfsePdfGenerator {
 
     this.data = {
       chaveAcesso: String(chaveAcesso),
-      numeroNfse: String(infNFSe.nNFSe || ''),
-      localEmissao: String(infNFSe.xLocEmi || ''),
-      localPrestacao: String(infNFSe.xLocPrestacao || ''),
-      localIncidencia: String(infNFSe.xLocIncid || ''),
-      tribNac: String(infNFSe.xTribNac || ''),
-      dataProcessamento: this.formatDateTime(String(infNFSe.dhProc || '')),
-      numeroDFSe: String(infNFSe.nDFSe || ''),
+      numeroNfse: extractText(infNFSe.nNFSe),
+      localEmissao: extractText(infNFSe.xLocEmi),
+      localPrestacao: extractText(infNFSe.xLocPrestacao),
+      localIncidencia: extractText(infNFSe.xLocIncid),
+      tribNac: extractText(infNFSe.xTribNac),
+      dataProcessamento: this.formatDateTime(extractText(infNFSe.dhProc)),
+      numeroDFSe: extractText(infNFSe.nDFSe),
       emitente: {
-        cnpj: this.formatCnpjCpf(String(emit.CNPJ || '')),
-        nome: String(emit.xNome || ''),
-        IM: String(emit.IM || ''),
-        logradouro: String(enderEmit.xLgr || ''),
-        numero: String(enderEmit.nro || ''),
-        bairro: String(enderEmit.xBairro || ''),
-        municipio: String(enderEmit.cMun || ''),
-        uf: String(enderEmit.UF || ''),
-        cep: this.formatCep(String(enderEmit.CEP || '')),
-        fone: this.formatPhone(String(emit.fone || '')),
-        email: String(emit.email || ''),
+        cnpj: this.formatCnpjCpf(extractText(emit.CNPJ)),
+        nome: extractText(emit.xNome),
+        IM: extractText(emit.IM),
+        logradouro: extractText(enderEmit.xLgr),
+        numero: extractText(enderEmit.nro),
+        bairro: extractText(enderEmit.xBairro),
+        municipio: extractText(enderEmit.cMun),
+        uf: extractText(enderEmit.UF),
+        cep: this.formatCep(extractText(enderEmit.CEP)),
+        fone: this.formatPhone(extractText(emit.fone)),
+        email: extractText(emit.email),
       },
       tomador: {
-        cnpj: this.formatCnpjCpf(String(toma.CNPJ || toma.CPF || toma.NIF || '-')),
-        nome: String(toma.xNome || ''),
-        IM: String(toma.IM || ''),
-        email: String(toma.email || ''),
-        logradouro: String(endToma.xLgr || ''),
-        numero: String(endToma.nro || ''),
-        complemento: String(endToma.xCpl || ''),
-        bairro: String(endToma.xBairro || ''),
-        municipio: String(endTomaNac.cMun || ''),
-        uf: String(endTomaNac.UF || emit.enderNac?.UF || ''),
-        cep: this.formatCep(String(endTomaNac.CEP || '')),
-        fone: this.formatPhone(String(toma.fone || '')),
+        cnpj: this.formatCnpjCpf(extractText(toma.CNPJ || toma.CPF || toma.NIF || '-')),
+        nome: extractText(toma.xNome),
+        IM: extractText(toma.IM),
+        email: extractText(toma.email),
+        logradouro: extractText(endToma.xLgr),
+        numero: extractText(endToma.nro),
+        complemento: extractText(endToma.xCpl),
+        bairro: extractText(endToma.xBairro),
+        municipio: extractText(endTomaNac.cMun),
+        uf: extractText(endTomaNac.UF || emit.enderNac?.UF),
+        cep: this.formatCep(extractText(endTomaNac.CEP)),
+        fone: this.formatPhone(extractText(toma.fone)),
       },
       servico: {
-        codTribNac: String(cServ.cTribNac || ''),
-        descricao: String(cServ.xDescServ || ''),
+        codTribNac: extractText(cServ.cTribNac),
+        descricao: extractText(cServ.xDescServ),
       },
       valores: {
-        valorServico: parseFloat(dpsValores.vServPrest?.vServ || 0),
-        valorLiquido: parseFloat(infValores.vLiq || 0),
-        valorTotalRet: parseFloat(infValores.vTotalRet || 0),
-        bcIssqn: parseFloat(infValores.vBC || 0),
-        aliqAplicada: parseFloat(infValores.pAliqAplic || 0),
-        issqnApurado: parseFloat(infValores.vISSQN || 0),
+        valorServico: parseFloat(extractText(dpsValores.vServPrest?.vServ) || 0),
+        valorLiquido: parseFloat(extractText(infValores.vLiq) || 0),
+        valorTotalRet: parseFloat(extractText(infValores.vTotalRet) || 0),
+        bcIssqn: parseFloat(extractText(infValores.vBC) || 0),
+        aliqAplicada: parseFloat(extractText(infValores.pAliqAplic) || 0),
+        issqnApurado: parseFloat(extractText(infValores.vISSQN) || 0),
+        vRetCSLL: parseFloat(extractText(dpsValores.trib?.tribFed?.piscofins?.vRetCSLL || dpsValores.trib?.tribFed?.vRetCSLL) || 0),
+        vRetIRRF: parseFloat(extractText(dpsValores.trib?.tribFed?.vRetIRRF || dpsValores.trib?.vRetIRRF) || 0),
+        vRetCP: parseFloat(extractText(dpsValores.trib?.tribFed?.vRetCP || dpsValores.trib?.vRetCP) || 0),
       },
       dps: {
-        numero: String(dps.nDPS || ''),
-        serie: String(dps.serie || ''),
-        competencia: this.formatDate(String(dps.dCompet || '')),
-        dataEmissao: this.formatDateTime(String(dps.dhEmi || '')),
+        numero: extractText(dps.nDPS),
+        serie: extractText(dps.serie),
+        competencia: this.formatDate(extractText(dps.dCompet)),
+        dataEmissao: this.formatDateTime(extractText(dps.dhEmi)),
       },
       tributacao: {
-        tribISSQN: String(dpsValores.trib?.tribMun?.tribISSQN || ''),
-        tpRetISSQN: String(dpsValores.trib?.tribMun?.tpRetISSQN || ''),
-        totTribFed: parseFloat(dpsValores.trib?.totTrib?.pTotTrib?.pTotTribFed || 0),
-        totTribEst: parseFloat(dpsValores.trib?.totTrib?.pTotTrib?.pTotTribEst || 0),
-        totTribMun: parseFloat(dpsValores.trib?.totTrib?.pTotTrib?.pTotTribMun || 0),
-        opSimpNac: String(opSimpNac),
-        regApTribSN: String(regApTribSN),
+        tribISSQN: extractText(dpsValores.trib?.tribMun?.tribISSQN),
+        tpRetISSQN: extractText(dpsValores.trib?.tribMun?.tpRetISSQN),
+        totTribFed: parseFloat(extractText(dpsValores.trib?.totTrib?.pTotTrib?.pTotTribFed) || 0),
+        totTribEst: parseFloat(extractText(dpsValores.trib?.totTrib?.pTotTrib?.pTotTribEst) || 0),
+        totTribMun: parseFloat(extractText(dpsValores.trib?.totTrib?.pTotTrib?.pTotTribMun) || 0),
+        opSimpNac: extractText(opSimpNac),
+        regApTribSN: extractText(regApTribSN),
+        vPis: parseFloat(extractText(dpsValores.trib?.tribFed?.piscofins?.vPis || dpsValores.trib?.tribFed?.vPis) || 0),
+        vCofins: parseFloat(extractText(dpsValores.trib?.tribFed?.piscofins?.vCofins || dpsValores.trib?.tribFed?.vCofins) || 0),
       }
     };
 
@@ -681,19 +694,32 @@ export class NfsePdfGenerator {
     this.cell('Contribuições Sociais - Retidas', col3X, row5HeadersY, col3W, 4, 'left', true, 7);
     this.cell('Descrição Contrib. Sociais - Retidas', col4X, row5HeadersY, col4W, 4, 'left', true, 7);
 
+    const vRetIRRFVal = this.data.valores.vRetIRRF;
+    const vRetCPVal = this.data.valores.vRetCP;
+    const vRetCSLLVal = this.data.valores.vRetCSLL;
+    
+    const irrfText = vRetIRRFVal > 0 ? `R$ ${this.formatMoney(vRetIRRFVal)}` : '-';
+    const cpText = vRetCPVal > 0 ? `R$ ${this.formatMoney(vRetCPVal)}` : '-';
+    const csllText = vRetCSLLVal > 0 ? `R$ ${this.formatMoney(vRetCSLLVal)}` : '-';
+
     const row5DataY = row5HeadersY + mm(4);
-    this.cell('-', col1X, row5DataY, col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row5DataY, col2W, 4, 'left', false, 8);
-    this.cell('-', col3X, row5DataY, col3W, 4, 'left', false, 8);
+    this.cell(irrfText, col1X, row5DataY, col1W, 4, 'left', false, 8);
+    this.cell(cpText, col2X, row5DataY, col2W, 4, 'left', false, 8);
+    this.cell(csllText, col3X, row5DataY, col3W, 4, 'left', false, 8);
     this.cell('-', col4X, row5DataY, col4W, 4, 'left', false, 8);
 
     const row6HeadersY = row5DataY + mm(5);
     this.cell('PIS - Débito Apuração Própria', col1X, row6HeadersY, col1W, 4, 'left', true, 7);
     this.cell('COFINS - Débito Apuração Própria', col2X, row6HeadersY, col2W, 4, 'left', true, 7);
 
+    const vPisVal = this.data.tributacao.vPis;
+    const vCofinsVal = this.data.tributacao.vCofins;
+    const pisText = vPisVal > 0 ? `R$ ${this.formatMoney(vPisVal)}` : '-';
+    const cofinsText = vCofinsVal > 0 ? `R$ ${this.formatMoney(vCofinsVal)}` : '-';
+
     const row6DataY = row6HeadersY + mm(4);
-    this.cell('-', col1X, row6DataY, col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row6DataY, col2W, 4, 'left', false, 8);
+    this.cell(pisText, col1X, row6DataY, col1W, 4, 'left', false, 8);
+    this.cell(cofinsText, col2X, row6DataY, col2W, 4, 'left', false, 8);
 
     this.setY(row6DataY + mm(5));
   }
@@ -732,8 +758,14 @@ export class NfsePdfGenerator {
     this.cell('PIS/COFINS - Débito Apur. Própria', col2X, row2Y, col2W, 4, 'left', true, 7);
     this.cell('Valor Líquido da NFS-e', col4X, row2Y, col4W, 4, 'left', true, 7);
 
-    this.cell('-', col1X, row2Y + mm(4), col1W, 4, 'left', false, 8);
-    this.cell('-', col2X, row2Y + mm(4), col2W, 4, 'left', false, 8);
+    const vRetCSLLVal = this.data.valores.vRetCSLL;
+    const retCSLLText = vRetCSLLVal > 0 ? `R$ ${this.formatMoney(vRetCSLLVal)}` : '-';
+    
+    const totalPisCofinsApria = (this.data.tributacao.vPis || 0) + (this.data.tributacao.vCofins || 0);
+    const totalPisCofinsApriaText = totalPisCofinsApria > 0 ? `R$ ${this.formatMoney(totalPisCofinsApria)}` : '-';
+
+    this.cell(retCSLLText, col1X, row2Y + mm(4), col1W, 4, 'left', false, 8);
+    this.cell(totalPisCofinsApriaText, col2X, row2Y + mm(4), col2W, 4, 'left', false, 8);
     this.cell(`R$ ${this.formatMoney(this.data.valores.valorLiquido)}`, col4X, row2Y + mm(4), col4W, 4, 'left', true, 8);
 
     this.setY(row2Y + mm(9));
