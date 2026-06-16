@@ -1,0 +1,103 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "NFS-e Nacional PDF Generator API",
+    "description": "API para geração de Documento Auxiliar da NFS-e (DANFSe) a partir de arquivos XML da NFS-e Nacional.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Servidor Atual"
+    }
+  ],
+  "paths": {
+    "/api/pdf": {
+      "post": {
+        "summary": "Gerar PDF da NFS-e",
+        "description": "Recebe o arquivo XML de uma NFS-e Nacional e retorna o documento auxiliar (DANFSe) gerado em formato PDF.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "xml": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo XML da NFS-e Nacional"
+                  }
+                },
+                "required": [
+                  "xml"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PDF gerado com sucesso.",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requisição inválida. Arquivo XML ausente ou erro no upload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "No XML file was uploaded. Please make sure the field name is \"xml\"."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Método não permitido. Apenas POST é aceito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Method not allowed. Use POST."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno ao processar o XML ou gerar o PDF.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Failed to generate PDF: Invalid XML format."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
