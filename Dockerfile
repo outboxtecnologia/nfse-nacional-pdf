@@ -1,32 +1,23 @@
-FROM php:8.2-apache
-
-# Enable Apache Rewrite module
-RUN a2enmod rewrite
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libzip-dev \
-    zip \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
-RUN docker-php-ext-install zip
-
-# Copy Composer from the official image
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Copy application files
-COPY . /var/www/html/
+FROM node:20-alpine
 
 # Set working directory
-WORKDIR /var/www/html/
+WORKDIR /app
 
-# Install composer dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Copy package files
+COPY package*.json ./
 
-# Fix permissions
-RUN chown -R www-data:www-data /var/www/html
+# Install production dependencies
+RUN npm ci --only=production
 
-# Expose port 80
-EXPOSE 80
+# Copy application files
+COPY . .
+
+# Expose server port
+EXPOSE 8000
+
+# Set production environment variables
+ENV PORT=8000
+ENV NODE_ENV=production
+
+# Run the Fastify server
+CMD ["npm", "start"]

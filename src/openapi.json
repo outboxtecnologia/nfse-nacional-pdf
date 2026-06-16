@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "NFS-e Nacional PDF Generator API",
-    "description": "API para geração de Documento Auxiliar da NFS-e (DANFSe) a partir de arquivos XML da NFS-e Nacional.",
+    "description": "API para geração de Documento Auxiliar da NFS-e (DANFSe) a partir de arquivos XML da NFS-e Nacional (Node.js/Fastify).",
     "version": "1.0.0"
   },
   "servers": [
@@ -58,22 +58,6 @@
                     "error": {
                       "type": "string",
                       "example": "No XML file was uploaded. Please make sure the field name is \"xml\"."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "405": {
-            "description": "Método não permitido. Apenas POST é aceito.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Method not allowed. Use POST."
                     }
                   }
                 }

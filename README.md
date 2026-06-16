@@ -1,30 +1,38 @@
-# NFS-e Nacional PDF Generator
+# NFS-e Nacional PDF Generator (Node.js & Fastify)
 
-
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/paseto/nfse-nacional-pdf.svg?style=flat-square)](https://packagist.org/packages/paseto/nfse-nacional-pdf)
-[![Total Downloads](https://img.shields.io/packagist/dt/paseto/nfse-nacional-pdf.svg?style=flat-square)](https://packagist.org/packages/paseto/nfse-nacional-pdf)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-
-Gerador de PDF para Documento Auxiliar da NFS-e (DANFSe) a partir de arquivos XML da NFS-e Nacional.
-
-`composer require paseto/nfse-nacional-pdf`
+Gerador de PDF para Documento Auxiliar da NFS-e (DANFSe) a partir de arquivos XML da NFS-e Nacional, rodando como um microsserviço Node.js com Fastify.
 
 ## Descrição
 
-Este projeto converte arquivos XML de Nota Fiscal de Serviços Eletrônica (NFS-e) no formato nacional em documentos 
-PDF formatados (DANFSe - Documento Auxiliar da NFS-e). Solução independente que não tem qualquer relação com o 
-oficial.
+Este projeto converte arquivos XML de Nota Fiscal de Serviços Eletrônica (NFS-e) no formato nacional em documentos PDF formatados (DANFSe - Documento Auxiliar da NFS-e). É uma solução independente e de alto desempenho baseada em PDFKit.
 
 ## Requisitos
 
-- PHP >= 7.4
-- Composer
+- Node.js >= 18
+- NPM ou Yarn
 
+## Instalação de Dependências
 
-## Contributing - ajude a aprimorar
+```bash
+npm install
+```
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
+## Como Rodar Localmente
+
+```bash
+npm run dev
+```
+
+O servidor iniciará em `http://localhost:8000`.
+
+## Endpoints Principais
+
+- **GET `/docs`**: Documentação interativa via Swagger UI e playground para testes.
+- **POST `/api/pdf`**: Recebe o arquivo XML e retorna o PDF correspondente de forma inline.
+
+### Exemplo de Requisição (curl)
+
+```bash
+curl --location 'http://localhost:8000/api/pdf' \
+--form 'xml=@"/caminho/para/o/seu/arquivo.xml"'
+```

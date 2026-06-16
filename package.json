@@ -1,0 +1,19 @@
+{
+  "name": "nfse-nacional-pdf-js",
+  "version": "1.0.0",
+  "description": "Gerador de PDF para DANFSe a partir de arquivos XML da NFS-e Nacional em Node.js com Fastify",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^8.2.0",
+    "fast-xml-parser": "^4.3.4",
+    "fastify": "^4.26.2",
+    "pdfkit": "^0.15.0",
+    "qrcode": "^1.5.3",
+    "svg-to-pdfkit": "^0.1.8"
+  }
+}
